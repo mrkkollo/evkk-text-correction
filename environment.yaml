@@ -1,0 +1,15 @@
+name: evkk
+channels:
+  - estnltk
+  - conda-forge
+  - defaults
+dependencies:
+  - estnltk=1.4.*
+  - nltk
+  - numpy
+  - pandas
+  - pip
+  - python=3.5
+  - swig
+  - pip:
+      - jamspell==0.0.12
