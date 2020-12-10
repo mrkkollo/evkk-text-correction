@@ -1,4 +1,5 @@
 import string
+from typing import List
 
 
 class Token:
@@ -24,7 +25,7 @@ class Correction:
         self.mistake_tokens = [token for token in self.correction.split(" ")]
 
 
-    def _clean_token(self, token: str):
+    def _clean_token(self, token: str) -> str:
         # Remove symbol characters from the token like '!' or ','.
         for char in string.punctuation:
             token = token.replace(char, '')
@@ -32,7 +33,7 @@ class Correction:
 
 
     @property
-    def corrected_tokens(self):
+    def corrected_tokens(self) -> List[Token]:
         container = []
         for index, original_token in enumerate(self.original_tokens):
             mistake_token = self._clean_token(self.mistake_tokens[index])

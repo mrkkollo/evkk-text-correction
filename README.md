@@ -43,7 +43,8 @@ print(correction.original)
 ## Peter Norvig Ngram + EstNLTK Corrector
 
 ### Required Resources
-
+* CSV file containing common mistakes and their corrections which will be replaced before applying the model. By default at: "texts/training_texts/word_mapping.csv"
+* Reference corpus of grammatically correct text in plain-text format with each instance of text separated by a new line.
 
 ### Description
 
