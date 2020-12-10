@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(mes
 
 
 class JamspellCorrector:
-    DEFAULT_MAPPING_PATH = "models/texts/training_texts/word_mapping.csv"
+    DEFAULT_MAPPING_PATH = "texts/training_texts/word_mapping.csv"
     DEFAULT_MODEL_PATH = "models/estonski.bin"
 
 

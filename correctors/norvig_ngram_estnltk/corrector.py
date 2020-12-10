@@ -78,8 +78,8 @@ class PeterNorvigNgramCorrector(NorvigEstnltkCore):
         return processed_text
 
 
-    def correct_text(self, text: str):
-        text = self.preprocess_text(text)
+    def correct_text(self, text: str, use_preprocessing: bool = True):
+        text = self.preprocess_text(text) if use_preprocessing else text
 
         tokens = self.words(text)
         candidates = {}
