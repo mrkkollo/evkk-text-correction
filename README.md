@@ -15,6 +15,11 @@ Details about the required resources will be in the "Correctors" section of this
 All correctors include the option to apply preprocessing with the use_preprocessing argument (by default True).
 As of 12.11.2020 this only includes replacing common word mistakes that are predefined in a .csv file.
 
+You can process whole files using this method of the correctors which will return a list of Correction instances:
+ ```python 
+ JamspellOrNorvigCorrectorInstance().process_test_file(file_path="texts/test_texts/A2_Innove_4.txt", use_preprocessing=True)
+```
+
 ## Jamspell Corrector
 
 ### Required Resources

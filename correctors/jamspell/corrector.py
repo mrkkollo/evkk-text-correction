@@ -1,5 +1,6 @@
 import logging
 import pathlib
+from typing import List
 
 import jamspell
 
@@ -18,6 +19,22 @@ class JamspellCorrector:
         self.corrector = jamspell.TSpellCorrector()
         self.word_mapping = JamspellCorrector.load_mapper_resources(correction_mapping_path)
         self.load_corrector_resources(model_path)
+
+
+    def process_test_file(self, file_path: str, use_preprocessing: bool = True) -> List[Correction]:
+        container = []
+        path = pathlib.Path(file_path)
+        if path.exists():
+            with open(file_path, "r", encoding="utf8") as fp:
+                for line in fp:
+                    line = line.strip()
+                    if line:
+                        line_correction = self.correct_text(line, use_preprocessing=use_preprocessing)
+                        container.append(line_correction)
+            return container
+
+        else:
+            raise FileNotFoundError("Could not find the test file! Try using an absolute path perhaps!?")
 
 
     @staticmethod

@@ -1,6 +1,7 @@
 import logging
 import pathlib
 from collections import Counter
+from typing import List
 
 from estnltk import Text
 from nltk import ngrams
@@ -14,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(mes
 
 class PeterNorvigNgramCorrector(NorvigEstnltkCore):
     DEFAULT_CORPUS_PATH = "texts/training_texts/norvig_corpus.txt"
-    DEFAULT_MAPPING_PATH = "models/texts/training_texts/word_mapping.csv"
+    DEFAULT_MAPPING_PATH = "texts/training_texts/word_mapping.csv"
 
 
     def __init__(self, corpus_path: str = DEFAULT_CORPUS_PATH, correction_mapping_path: str = DEFAULT_MAPPING_PATH):
@@ -76,6 +77,22 @@ class PeterNorvigNgramCorrector(NorvigEstnltkCore):
             processed_text = processed_text.replace(mistake, correct)
         logging.debug("Finished replacing the words!")
         return processed_text
+
+
+    def process_test_file(self, file_path: str, use_preprocessing: bool = True) -> List[Correction]:
+        container = []
+        path = pathlib.Path(file_path)
+        if path.exists():
+            with open(file_path, "r", encoding="utf8") as fp:
+                for line in fp:
+                    line = line.strip()
+                    if line:
+                        line_correction = self.correct_text(line, use_preprocessing=use_preprocessing)
+                        container.append(line_correction)
+            return container
+
+        else:
+            raise FileNotFoundError("Could not find the test file! Try using an absolute path perhaps!?")
 
 
     def correct_text(self, text: str, use_preprocessing: bool = True):
