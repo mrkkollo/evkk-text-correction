@@ -1,15 +1,14 @@
 name: evkk
 channels:
-  - estnltk
   - conda-forge
+  - stanfordnlp
   - defaults
 dependencies:
-  - estnltk=1.4.*
-  - nltk
   - numpy
   - pandas
+  - stanza
   - pip
-  - python=3.5
+  - python=3.7
   - swig
   - pip:
       - jamspell==0.0.12

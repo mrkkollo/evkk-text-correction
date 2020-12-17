@@ -1,8 +1,8 @@
 import logging
 import pathlib
-from typing import List
 
 import jamspell
+import stanza
 
 from helpers import Correction
 
@@ -13,28 +13,15 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(mes
 class JamspellCorrector:
     DEFAULT_MAPPING_PATH = "texts/training_texts/word_mapping.csv"
     DEFAULT_MODEL_PATH = "models/estonski.bin"
+    DEFAULT_MODEL_DIRECTORY = "models/"
 
 
-    def __init__(self, model_path: str = DEFAULT_MODEL_PATH, correction_mapping_path: str = DEFAULT_MAPPING_PATH):
+    def __init__(self, model_path: str = DEFAULT_MODEL_PATH, correction_mapping_path: str = DEFAULT_MAPPING_PATH, stanza_model_path=DEFAULT_MODEL_DIRECTORY, use_gpu=False):
+        self.nlp = None
         self.corrector = jamspell.TSpellCorrector()
         self.word_mapping = JamspellCorrector.load_mapper_resources(correction_mapping_path)
-        self.load_corrector_resources(model_path)
-
-
-    def process_test_file(self, file_path: str, use_preprocessing: bool = True) -> List[Correction]:
-        container = []
-        path = pathlib.Path(file_path)
-        if path.exists():
-            with open(file_path, "r", encoding="utf8") as fp:
-                for line in fp:
-                    line = line.strip()
-                    if line:
-                        line_correction = self.correct_text(line, use_preprocessing=use_preprocessing)
-                        container.append(line_correction)
-            return container
-
-        else:
-            raise FileNotFoundError("Could not find the test file! Try using an absolute path perhaps!?")
+        self.__load_corrector_resources(model_path)
+        self.__load_lemmatizer_resources(stanza_model_path, use_gpu)
 
 
     @staticmethod
@@ -54,7 +41,13 @@ class JamspellCorrector:
             raise FileNotFoundError("Could not find the CSV file with the path: {}!".format(file_path))
 
 
-    def load_corrector_resources(self, file_path: str):
+    def __load_lemmatizer_resources(self, model_folder: str, use_gpu=False):
+        logging.debug("Starting loading the the Stanza models into the Pipeline!")
+        self.nlp = stanza.Pipeline(lang='et', processors='tokenize,pos,lemma', dir=model_folder, use_gpu=use_gpu)
+        logging.debug("Finished loading the stanza models!")
+
+
+    def __load_corrector_resources(self, file_path: str):
         if pathlib.Path(file_path).exists():
             logging.debug("Loading the Jamspell model into memory! During first loads, this might take a while!")
             self.corrector.LoadLangModel(file_path)
@@ -63,16 +56,7 @@ class JamspellCorrector:
             raise FileNotFoundError("Could not find model with the path: {}!".format(file_path))
 
 
-    def preprocess_text(self, original_text: str):
-        logging.debug("Replacing the words in the text by the defined mappings from the file as a preprocessing step!")
-        processed_text = original_text
-        for mistake, correct in self.word_mapping:
-            processed_text = processed_text.replace(mistake, correct)
-        logging.debug("Finished replacing the words!")
-        return processed_text
-
-
-    def get_candidates_for_text(self, corrected_text: str):
+    def _get_candidates_for_text(self, corrected_text: str):
         candidates = {}
         tokens = [token for token in corrected_text.split(" ")]
         for index, token in enumerate(tokens):
@@ -84,6 +68,15 @@ class JamspellCorrector:
         return candidates
 
 
+    def preprocess_text(self, original_text: str):
+        logging.debug("Replacing the words in the text by the defined mappings from the file as a preprocessing step!")
+        processed_text = original_text
+        for mistake, correct in self.word_mapping:
+            processed_text = processed_text.replace(mistake, correct)
+        logging.debug("Finished replacing the words!")
+        return processed_text
+
+
     def correct_text(self, original_text: str, use_preprocessing: bool = True):
 
         preocessed_text = self.preprocess_text(original_text) if use_preprocessing else original_text
@@ -93,10 +86,20 @@ class JamspellCorrector:
         logging.debug("Finished applying the Jamspell model, final result!")
 
         logging.debug("Getting the candidates.")
-        candidates = self.get_candidates_for_text(corrected_text)
+        candidates = self._get_candidates_for_text(corrected_text)
         logging.debug("Finished getting the candidates!")
 
         return Correction(original=original_text, correction=corrected_text, candidates=candidates)
+
+
+    def lemmatize(self, text: str, use_preprocessing=True):
+        tokens = []
+        corrected_text = self.correct_text(text, use_preprocessing)
+        stanza_analysis = self.nlp(corrected_text.correction)
+        for sentence in stanza_analysis.sentences:
+            for word in sentence.words:
+                tokens.append(word.lemma)
+        return " ".join(tokens)
 
 
 if __name__ == '__main__':
