@@ -9,6 +9,6 @@ dependencies:
   - stanza
   - pip
   - python=3.7
-  - swig
+  - swig=3
   - pip:
       - jamspell==0.0.12
