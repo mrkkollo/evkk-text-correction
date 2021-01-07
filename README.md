@@ -1,6 +1,6 @@
 # Installation
 
-* Run ```conda env install -f environment.yaml``` to create the Python environment.
+* Run ```conda env create -f environment.yaml``` to create the Python environment.
 
 
 # Usage
