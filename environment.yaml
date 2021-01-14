@@ -12,3 +12,4 @@ dependencies:
   - swig=3
   - pip:
       - jamspell==0.0.12
+      - typing_extensions
